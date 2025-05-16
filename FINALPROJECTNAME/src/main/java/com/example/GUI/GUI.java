@@ -2,8 +2,8 @@ package com.example.GUI;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -11,8 +11,6 @@ public class GUI {
     
     public GUI() {
         JFrame frame = new JFrame();
-        
-        JButton button = new JButton("Click");
 
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(30,30,10,30));

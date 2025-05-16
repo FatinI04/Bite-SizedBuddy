@@ -1,6 +1,11 @@
 package com.example;
 
-public class runner 
-{
-    
+import com.example.GUI.GUI;
+
+public class runner {
+
+    public static void main(String[] args) {
+        GUI main = new GUI();
+    }
+
 }
