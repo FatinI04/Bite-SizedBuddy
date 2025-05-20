@@ -1,11 +1,14 @@
 package com.example;
 
-import com.example.GUI.GUI;
+import com.example.API.API;
 
 public class runner {
 
     public static void main(String[] args) {
-        GUI main = new GUI();
+        API ap1 = new API();
+        ap1.setAPIData("beef");
+        System.out.println(ap1.getInfo());
+        
     }
 
 }

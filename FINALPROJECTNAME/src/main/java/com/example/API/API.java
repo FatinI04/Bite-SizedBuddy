@@ -1,34 +1,97 @@
 package com.example.API;
 
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 public class API {
+
+
+    private ArrayList<String> mainInfo;
+
+
+    public API() {
+        mainInfo = new ArrayList<String>();
+    }
+
+
     public static String getData(String endpoint) throws Exception {
-        /*endpoint is a url (string) that you get from an API website*/
         URL url = new URL(endpoint);
-        /*connect to the URL*/
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        /*creates a GET request to the API.. Asking the server to retrieve information for our program*/
         connection.setRequestMethod("GET");
 
+
         StringBuilder content;
-        try ( /* When you read data from the server, it wil be in bytes, the InputStreamReader will convert it to text.
-        The BufferedReader wraps the text in a buffer so we can read it line by line*/ BufferedReader buff = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            String inputLine;//variable to store text, line by line
-            /*A string builder is similar to a string object but faster for larger strings,
-            you can concatenate to it and build a larger string. Loop through the buffer
-            (read line by line). Add it to the stringbuilder */
+        try (BufferedReader buff = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String inputLine;
             content = new StringBuilder();
             while ((inputLine = buff.readLine()) != null) {
                 content.append(inputLine);
             }
-            //close the bufferreader
-        } //variable to store text, line by line
-        connection.disconnect(); //disconnect from server 
-        return content.toString(); //return the content as a string
+        }
+        connection.disconnect();
+        return content.toString();
     }
 
+
+    // Main method to call Open Food Facts API
+    public void setAPIData(String product1) {
+        try {
+            String searchQuery = product1;
+            String searchURL = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=" +
+                               searchQuery.replace(" ", "+") + "&search_simple=1&json=1";
+            String searchResult = getData(searchURL);
+            JSONObject searchObj = new JSONObject(searchResult);
+            JSONArray products = searchObj.getJSONArray("products");
+
+
+            if (products.length() == 0) {
+                mainInfo.add("No products found.");
+                return;
+            }
+
+
+            JSONObject product = products.getJSONObject(0);
+            String productName = product.optString("product_name", "Unknown Product");
+            String brand = product.optString("brands", "Unknown Brand");
+            String ingredients = product.optString("ingredients_text", "No ingredient info");
+            String nutritionGrade = product.optString("nutrition_grade_fr", "N/A");
+
+
+            JSONObject nutrients = product.optJSONObject("nutriments");
+            String energy = nutrients != null ? nutrients.optString("energy-kcal_100g", "N/A") : "N/A";
+            String fat = nutrients != null ? nutrients.optString("fat_100g", "N/A") : "N/A";
+            String sugars = nutrients != null ? nutrients.optString("sugars_100g", "N/A") : "N/A";
+            String protein = nutrients != null ? nutrients.optString("proteins_100g", "N/A") : "N/A";
+
+
+            mainInfo.add( "\n" + "Product: " + productName + "\n" +
+                       "Brand: " + brand + "\n" +
+                       "Ingredients: " + ingredients + "\n" +
+                       "Nutrition Grade: " + nutritionGrade + "\n" +
+                       "Per 100g:\n" +
+                       "- Energy: " + energy + " kcal\n" +
+                       "- Fat: " + fat + " g\n" +
+                       "- Sugars: " + sugars + " g\n" +
+                       "- Protein: " + protein + " g\n");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mainInfo.add("Error retrieving data.");
+        }
+    }
+
+
+    public ArrayList<String> getInfo() {
+        return mainInfo;
+    }
 }
